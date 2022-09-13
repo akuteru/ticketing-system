@@ -72,7 +72,8 @@
             confirmPassword: "",
             errorMessage: '',
             registerErrorMessage: '',
-            rememberMe: false
+            rememberMe: false,
+            userData: {}
         }),
         methods:{
             login(){
@@ -112,6 +113,26 @@
                                     break
                             }
                         })
+            },
+            async getUserInfo(){
+                const userId = firebase.auth.currentUser.uid;
+                const userCollection = firebase.firestore.collection('user').doc(userId)
+                userCollection.get().then((doc) => {
+                    // const userInfo = doc.data()
+                    const userInfo = {
+                        lastName: doc.data().lastName,
+                        firstName: doc.data().firstName,
+                        middleName: doc.data().middleName,
+                        roleName: doc.data().roleName,
+                        department: doc.data().department,
+                        studentCourse: doc.data().studentCourse,
+                        profileImg: doc.data().profileImg,
+                        birthDate: doc.data().birthDate,
+                        address: doc.data().address,
+                        createdAt: doc.data().createdAt
+                    }
+                    this.userData = userInfo
+                })
             },
             async loginWithProvider(providerName){
                 var provider = null
@@ -178,6 +199,7 @@
                     studentCourse: '',
                     profileImg: '',
                     birthDate: '',
+                    gender: '',
                     address: '',
                     createdAt: firebase.fieldValue.serverTimestamp(),
                     openTickets: 0,

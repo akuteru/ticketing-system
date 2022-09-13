@@ -3,11 +3,9 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import vuetify from './plugins/vuetify'
-import LottieAnimation from 'lottie-vuejs'
 import firebase from './firebase/index'
 
 
-Vue.use(LottieAnimation)
 Vue.config.productionTip = false
 
 let app = '';

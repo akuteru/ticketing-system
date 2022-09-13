@@ -5,24 +5,26 @@
                 <v-toolbar-title>My Tickets</v-toolbar-title>
                 <v-spacer></v-spacer>
                 <v-btn v-if="hasSelectedTicket" 
-                    color="green darken-4" 
+                    color="red darken-4" 
                     dark 
-                    @click="closeTicketDialog"
+                    small
+                    @click="openCloseTicketDialog"
                     class="mr-2">
-                    <v-icon class="mr-3">mdi-close</v-icon>
+                    <v-icon class="mr-2">mdi-close</v-icon>
                     <span>Close ticket</span>
                 </v-btn>
                 <v-btn v-if="userInfo.roleName == 'Student'" 
-                    color="blue darken-4" 
+                    color="blue darken-4"
+                    small 
                     dark 
                     @click="openTicketDialog">
-                    <v-icon class="mr-3">mdi-plus</v-icon>
+                    <v-icon class="mr-2">mdi-plus</v-icon>
                     <span>Create ticket</span>
                 </v-btn>
             </v-toolbar>
             <v-divider></v-divider>
             <v-row>
-                <v-col cols="3">
+                <v-col md="3" sm="4" xs="12">
                     <v-list color="grey lighten-4">
                         <v-list-item-group
                             v-model="selectedTicket"
@@ -59,8 +61,17 @@
                         </v-list-item-group>
                     </v-list>
                 </v-col>
-                <v-col cols="9">
-                    <Message v-if="hasSelectedTicket" :ticketId="selectedTicketId" :currentUserInfo="userInfo"/>
+                <v-col md="9" sm="8" xs="12">
+                    <Message v-if="hasSelectedTicket" 
+                        :key="messageKey" 
+                        :ticketId="selectedTicketId" 
+                        :currentUserInfo="userInfo" 
+                        :isTicketClosed="clickedTicket.isClosed"/>
+                    <div v-else class="text-center py-10 d-flex flex-column">
+                        <lottie :options="animationOptions" :height="300" :width="300" class="mx-auto"/>
+                        <span class="text-h5 grey--text text--darken-1">Select a message</span>
+                        <span class="text-subtitle grey--text text--lighten-1">You can choose from the list of messages from the left to display its content.</span>
+                    </div>
                 </v-col>
             </v-row>
         </v-card>
@@ -111,6 +122,143 @@
             </v-card>
         </v-dialog>
         <v-dialog
+            v-model="closeTicketDialog"
+            max-width="800px"
+            >
+            <v-card>
+                <v-card-title>
+                    <span class="text-h5">ASCAT Customer Feedback</span>
+                </v-card-title>
+                <v-card-subtitle>
+                    <span class="subtitle">Please let us know how we served you. This form may be used for compliment, suggestion and/or complaint</span>
+                </v-card-subtitle>
+                <v-divider></v-divider>
+                <v-card-text class="mt-4">
+                    <span>1. How satisfied were you in terms of response time to your transaction given by the office?</span>
+                    <v-rating
+                        empty-icon="mdi-star-outline"
+                        full-icon="mdi-star"
+                        half-icon="mdi-star-half-full"
+                        hover
+                        length="5"
+                        size="32"
+                        color="yellow"
+                        v-model="feedback.item1"
+                    ></v-rating>
+                    <span>2. How satisfied were you with the outcome of the service provided?</span>
+                    <v-rating
+                        empty-icon="mdi-star-outline"
+                        full-icon="mdi-star"
+                        half-icon="mdi-star-half-full"
+                        hover
+                        length="5"
+                        size="32"
+                        color="yellow"
+                        v-model="feedback.item2"
+                    ></v-rating>
+                    <span>3. How satisfied were you with the service provider's extensive information /understanding of the service being provided?</span>
+                    <v-rating
+                        empty-icon="mdi-star-outline"
+                        full-icon="mdi-star"
+                        half-icon="mdi-star-half-full"
+                        hover
+                        length="5"
+                        size="32"
+                        color="yellow"
+                        v-model="feedback.item3"
+                    ></v-rating>
+                    <span>4. How satisfied were you with the service provider's competence or the skill in delivering service?</span>
+                    <v-rating
+                        empty-icon="mdi-star-outline"
+                        full-icon="mdi-star"
+                        half-icon="mdi-star-half-full"
+                        hover
+                        length="5"
+                        size="32"
+                        color="yellow"
+                        v-model="feedback.item4"
+                    ></v-rating>
+                    <span>5. How satisfied were you with the service provider's friendliness, courteousness/politeness, fair treatment and willingness to do more then what is expected or going to extra mile?</span>
+                    <v-rating
+                        empty-icon="mdi-star-outline"
+                        full-icon="mdi-star"
+                        half-icon="mdi-star-half-full"
+                        hover
+                        length="5"
+                        size="32"
+                        color="yellow"
+                        v-model="feedback.item5"
+                    ></v-rating>
+                    <span>6. How would you rate our <strong>OVERALL SATISFACTION</strong> with regard to the quality of service delivery?</span>
+                    <v-rating
+                        empty-icon="mdi-star-outline"
+                        full-icon="mdi-star"
+                        half-icon="mdi-star-half-full"
+                        hover
+                        length="5"
+                        size="32"
+                        color="yellow"
+                        v-model="feedback.item6"
+                    ></v-rating>
+                    <v-combobox
+                        filled
+                        class="mt-4"
+                        outlined
+                        label="Inquiry Type"
+                        v-model="feedback.providedDetails"
+                        :items="feedbackItems"
+                    ></v-combobox>
+                    <v-textarea
+                        outlined
+                        label="Facts or details about the indcident"
+                        v-model="feedback.incidentDetails"
+                    >
+                    </v-textarea>
+                    <v-textarea
+                        outlined
+                        label="Recommendation/Suggestion/Desired Action from the Office"
+                        v-model="feedback.recommendation"
+                    >
+                    </v-textarea>
+                    <v-expansion-panels>
+                        <v-expansion-panel>
+                            <v-expansion-panel-header>
+                                Data Privacy
+                            </v-expansion-panel-header>
+                            <v-expansion-panel-content>
+                                The Agusan del Sur State College of Agriculture and Technology (ASSCAT) is committed to protect your personal data (if given) and recognize our responsibilities under Republic Act No. 10173, also known as Data Privacy Act of 2012.
+                            </v-expansion-panel-content>
+                        </v-expansion-panel>
+                    </v-expansion-panels>
+                    <v-checkbox v-model="feedback.termsAgree">
+                        <template v-slot:label>
+                            <div class="text-caption">
+                                I have read and understand the ASSCAT's Data Privacy Statement and express my consent for ASSCAT to collect, store, use, and share, process my Feedback on their service/s.
+                            </div>
+                        </template>
+                    </v-checkbox>
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn
+                        color="blue darken-4"
+                        text
+                        @click="closeTicketDialog = false"
+                    >
+                        Close
+                    </v-btn>
+                    <v-btn
+                        color="blue darken-4"
+                        text
+                        @click="proceedCloseTicket"
+                        :disabled="feedback.termsAgree == false"
+                    >
+                        Send Feedback
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+        <v-dialog
             v-model="loadingDialog"
             hide-overlay
             persistent
@@ -121,7 +269,7 @@
                 dark
             >
                 <v-card-text>
-                Creating ticket...
+                {{loadingText}}
                 <v-progress-linear
                     indeterminate
                     color="white"
@@ -153,6 +301,9 @@
 
 </template>
 <script>
+
+    import Lottie from '../components/Lottie.vue'
+    import messageAnimationData from '../assets/lotties/messages.json'
     import { onUnmounted } from 'vue'
     import firebase from '../firebase/index'
     import Message from '../components/Messages.vue'
@@ -162,18 +313,48 @@
     export default {
         data(){
             return{
+                animationSpeed: 1,
+                animationOptions: {animationData: messageAnimationData},
+                feedback:{
+                    ticketId:'',
+                    userId: '',
+                    userFullName:'',
+                    userPhoto: '',
+                    repId: '',
+                    repFullName:'',
+                    repPhoto:'',
+                    item1:0,
+                    item2:0,
+                    item3:0,
+                    item4:0,
+                    item5:0,
+                    item6:0,
+                    providedDetails: '',
+                    incidentDetails: '',
+                    recommendation: '',
+                    termsAgree: false,
+                    createdAt: firebase.fieldValue.serverTimestamp()
+                },
+                feedbackItems:[
+                    "Compliment",
+                    "Suggestion",
+                    "Complaint"
+                ],
+                messageKey: 'message-',
+                loadingText: 'Creating ticket...',
                 loadingDialog: false,
                 hasSelectedTicket: false,
                 snackbar: false,
                 snackbarTimeout: 2000,
                 snackbarText: '',
                 selectedTicketId: '',
-                selectedTicket: {},
+                selectedTicket: '',
+                clickedTicket: {},
                 selectedDepartment: '',
                 createTicketDialog: false,
+                closeTicketDialog: false,
                 description: '',
                 tickets: [],
-                selectedTicket: '',
                 userInfo: {
                     lastName: '',
                     firstName: '',
@@ -375,11 +556,11 @@
                 queryField = "createdById"
             }
             const ticketCollection = firestore.collection('ticket').where(queryField,"==",userId)
-            const query = ticketCollection.orderBy('createdAt', 'desc')
+            const query = ticketCollection.orderBy('lastModified', 'desc').limit(20)
             const unsubscribe = query.onSnapshot(snapshot => {
                 const tickets = [];
                 snapshot.forEach((doc) => {  
-                    tickets.push({
+                    tickets.unshift({
                         id: doc.id,
                         acceptedById: doc.data().acceptedById,
                         acceptedByName: doc.data().acceptedByName,
@@ -389,6 +570,7 @@
                         createdAt: doc.data().createdAt,
                         createdById: doc.data().createdById,
                         isClosed: doc.data().isClosed,
+                        closedById: doc.data().closedById,
                         lastModified: doc.data().lastModified
                     })
                 })
@@ -421,6 +603,7 @@
                 return moment(date.toDate()).fromNow()
             },
             createTicket(){
+                this.loadingText = 'Creating ticket...'
                 this.loadingDialog = true
                 const userId = firebase.auth.currentUser.uid
                 const fullName = this.userInfo.firstName + ' ' + this.userInfo.lastName
@@ -430,10 +613,17 @@
                     createdById: userId,
                     description: this.description,
                     department: this.selectedDepartment,
-                    createdAt: firebase.fieldValue.serverTimestamp
+                    createdAt: firebase.fieldValue.serverTimestamp()
                 }
-                const ticketCollection = firebase.firestore.collection('openTicket');
-                ticketCollection.add(ticketData).then((docRef) => {
+                var batch = firestore.batch()
+                const openTicketRef = firebase.firestore.collection('openTicket').doc();
+                const userRef = firebase.firestore.collection('user').doc(userId)
+                batch.set(openTicketRef, ticketData)
+                batch.update(userRef, {
+                    openTickets: firebase.fieldValue.increment(1),
+                    totalTickets: firebase.fieldValue.increment(1)
+                })
+                batch.commit().then(() => {
                     this.createTicketDialog = false
                     this.loadingDialog = false
                     this.snackbarText = "Ticket with id has been created. Please wait until a representative reply to your ticket"
@@ -447,17 +637,87 @@
             },
             ticketSelected(ticket){
                 if(typeof ticket !== 'undefined'){
+                    const userId = auth.currentUser.uid
+
+                    this.messageKey = ticket.id
                     this.selectedTicketId = ticket.id
+                    this.clickedTicket = ticket
                     this.hasSelectedTicket = true
+
+                    this.feedback.ticketId = this.clickedTicket.id
+                    this.feedback.userId = this.clickedTicket.createdById
+                    this.feedback.userFullName = this.clickedTicket.authorName
+                    this.feedback.userPhoto = this.clickedTicket.authorImage
+                    this.feedback.repId = userId
+                    this.feedback.repFullName = this.userInfo.firstName + ' ' + this.userInfo.lastName
+                    this.feedback.repPhoto = this.userInfo.profileImg
                 }   
+            },
+            openCloseTicketDialog(){
+                this.closeTicketDialog = true
             },
             openTicketDialog(){
                 this.createTicketDialog = true
                 this.selectedDepartment = this.userInfo.department
+            },
+            proceedCloseTicket(){
+                this.closeTicketDialog = false
+                this.loadingText = 'Closing ticket...'
+                this.loadingDialog = true
+                const userId = auth.currentUser.uid
+
+                const feedbackRef = firestore.collection('feedback').doc()
+                const repUserRef = firestore.collection('user').doc(this.clickedTicket.acceptedById)
+                const userRef = firestore.collection('user').doc(this.clickedTicket.createdById)
+                const ticketRef = firestore.collection('ticket').doc(this.clickedTicket.id)
+                var batch = firestore.batch()
+                batch.set(feedbackRef, this.feedback)
+                batch.update(repUserRef,{
+                    openTickets: firebase.fieldValue.increment(-1),
+                    closedTickets: firebase.fieldValue.increment(1)
+                })
+                batch.update(userRef,{
+                    closedTickets: firebase.fieldValue.increment(1)
+                })
+                batch.update(ticketRef,{
+                    isClosed: true,
+                    closedById: userId
+                })
+                batch.commit().then(() => {
+                    this.loadingDialog = false
+                    this.snackbarText = 'Ticket has been closed'
+                    this.snackbar = true
+                    this.feedback = {
+                        ticketId:'',
+                        userId: '',
+                        userFullName:'',
+                        userPhoto: '',
+                        repId: '',
+                        repFullName:'',
+                        repPhoto:'',
+                        item1:0,
+                        item2:0,
+                        item3:0,
+                        item4:0,
+                        item5:0,
+                        item6:0,
+                        providedDetails: '',
+                        incidentDetails: '',
+                        recommendation: '',
+                        termsAgree: false,
+                        createdAt: firebase.fieldValue.serverTimestamp()
+                    }
+                    this.messageKey = 'message-'
+                    this.selectedTicketId = ''
+                    this.clickedTicket = {}
+                    this.hasSelectedTicket = false
+                    
+                })
             }
         },
         components: {
-            Message
+            Message,
+            'lottie': Lottie
         },
     }
 </script>

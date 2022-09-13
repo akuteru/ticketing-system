@@ -2,7 +2,7 @@
     <v-card elevation="2" :color="sender ? 'blue lighten-5' : 'white'">
       <div v-if="sender" class="d-flex flex-row-reverse px-2 py-2">
         <Avatar class="align-center justify-center" :src="photoUrl" />
-        <div class="d-flex flex-column ml-2">
+        <div class="d-flex flex-column ml-2" :class="sender ? 'text-right mr-2' : 'text-left mr-2'">
           <span class="text-subtitle-1 blue--text text--darken-4">{{name}}</span>
           <span class="text-subtitle-2"><small>{{getDate}}</small></span>
         </div>

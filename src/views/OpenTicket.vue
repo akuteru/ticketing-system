@@ -2,9 +2,12 @@
     <v-container fluid>
         <v-card>
             <v-toolbar elevation="0">
-                <v-toolbar-title>
+                <v-toolbar-title v-if="hasAccess">
                     <span class="text-h6">{{userInfo.department}}</span>
                     <small class="ml-2">(Open tickets for this department)</small>
+                </v-toolbar-title>
+                <v-toolbar-title v-else>
+                    <span class="text-h6">My Open Tickets</span>
                 </v-toolbar-title>
                 <v-spacer></v-spacer>
             </v-toolbar>
@@ -32,6 +35,7 @@
 
                                 <v-card-actions>
                                 <v-btn
+                                    v-if="hasAccess"
                                     class="mt-3 ml-2 mb-2"
                                     right
                                     light
@@ -166,11 +170,22 @@
                 },
             }
         },
+        computed:{
+            hasAccess(){
+                return this.userInfo.roleName !== 'Student'
+            }
+        },
         async mounted(){ 
             document.title = "Open Tickets - Stakeholders Online Support"
             await this.getUserInfo()
             console.log(this.userInfo.department)
-            const ticketCollection = firestore.collection('openTicket').where("department","==",this.userInfo.department)
+            let queryField = "department"
+            let queryValue = this.userInfo.department
+            if(this.userInfo.roleName == 'Student'){
+                queryField = "createdById"
+                queryValue = auth.currentUser.uid
+            }
+            const ticketCollection = firestore.collection('openTicket').where(queryField,"==",queryValue)
             const query = ticketCollection.orderBy('createdAt', 'desc')
             query.onSnapshot(snapshot => {
                 const tickets = [];
@@ -234,6 +249,7 @@
                     acceptedByImage: this.userInfo.profileImg,
                     createdAt: firebase.fieldValue.serverTimestamp(),
                     isClosed: false,
+                    closedById: '',
                     lastModified: firebase.fieldValue.serverTimestamp(),
                     createdById: this.selectedTicket.createdById
                 }
@@ -247,11 +263,21 @@
                 const ticketRef = firebase.firestore.collection('ticket').doc()
                 const openTicketRef = firebase.firestore.collection('openTicket').doc(this.selectedTicket.id)
                 const messageRef = ticketRef.collection('message').doc()
+                const repUserRef = firebase.firestore.collection('user').doc(userId)
+                const studentUserRef = firebase.firestore.collection('user').doc(this.selectedTicket.createdById)
                 var batch = firebase.firestore.batch()
 
                 batch.set(ticketRef, ticketData)
                 batch.delete(openTicketRef)
                 batch.set(messageRef, messageData)
+                batch.update(repUserRef, {
+                    openTickets: firebase.fieldValue.increment(1),
+                    totalTickets: firebase.fieldValue.increment(1)
+                })
+                batch.update(studentUserRef, {
+                    totalTickets: firebase.fieldValue.increment(1),
+                    openTickets: firebase.fieldValue.increment(-1)
+                })
 
                 batch.commit().then(() => {
                     this.loadingDialog = false

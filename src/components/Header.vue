@@ -64,10 +64,11 @@
         data: () => ({
             menuDrawer: false,
             menuList: [
-                { title: 'Dashboard', icon: 'mdi-view-dashboard', link: '/' },
-                { title: 'Messages', icon: 'mdi-forum', link: '/messages' },
-                { title: 'Profile', icon: 'mdi-account-circle', link: '/profile' },
-                { title: 'Help desk', icon: 'mdi-help-box' },
+                { title: 'Dashboard', icon: 'mdi-view-dashboard', link: '/', adminAccess: false },
+                { title: 'Messages', icon: 'mdi-forum', link: '/messages', adminAccess: false },
+                { title: 'Profile', icon: 'mdi-account-circle', link: '/profile', adminAccess: false },
+                { title: 'Approvals', icon: 'mdi-check', adminAccess: true },
+                { title: 'Help desk', icon: 'mdi-help-box', adminAccess: false },
             ]
         }),
         computed: {

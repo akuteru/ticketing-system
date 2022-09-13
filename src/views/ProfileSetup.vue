@@ -63,6 +63,13 @@
                                             outlined
                                             clearable
                                         ></v-text-field>
+                                        <v-combobox
+                                            filled
+                                            outlined
+                                            label="Gender"
+                                            v-model="user.gender"
+                                            :items="genderList"
+                                        ></v-combobox>
                                         <v-dialog
                                             ref="dialog"
                                             v-model="dateModal"
@@ -100,7 +107,13 @@
                                                 OK
                                             </v-btn>
                                             </v-date-picker>
-                                        </v-dialog>
+                                        </v-dialog> 
+                                        <v-textarea
+                                            outlined
+                                            label="Address"
+                                            v-model="user.address"
+                                        >
+                                        </v-textarea>
                                         <v-combobox
                                             filled
                                             outlined
@@ -195,9 +208,11 @@ export default {
         dateModal: false,
         snackbar: false,
         snackbarText: 'My timeout is set to 2000.',
-        snackbarTimeout: 2000,
+        snackbarTimeout: 4000,
         errorDialog: false,
         loadingDialog: false,
+        previousRole: '',
+        genderList: ["Male","Female"],
         user:{
             lastName: '',
             firstName: '',
@@ -205,7 +220,13 @@ export default {
             roleName: '',
             department: '',
             studentCourse: '',
-            profileImg: ''
+            birthDate: '',
+            gender: '',
+            address: '',
+            profileImg: '',
+            openTickets: 0,
+            totalTickets: 0,
+            closedTickets: 0
         },
         profileImageFile: null,
         errorText: '',
@@ -397,12 +418,7 @@ export default {
             this.loadingDialog = true
             const userId = firebase.auth.currentUser.uid
             if(this.profileImageFile == null){
-                firebase.firestore.collection('user').doc(userId).set(this.user).then(() => {
-                    this.loadingDialog = false
-                    this.snackbar = true
-                    this.snackbarText = "Profile has been updated"
-                })
-                this.loadingDialog = false
+                this.saveUser(userId)
                 return
             }
             const fileName = this.profileImageFile.name
@@ -425,14 +441,50 @@ export default {
                 () => {
                     uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
                         this.user.profileImg = downloadURL
-                        firebase.firestore.collection('user').doc(userId).set(this.user).then(() => {
-                            this.loadingDialog = false
-                            this.snackbar = true
-                            this.snackbarText = "Profile has been updated"
-                        })
+                        this.saveUser(userId)
                     });
                 }
             )
+        },
+        saveUser(userId){
+            console.log(this.previousRole + " => " + this.user.roleName)
+            var batch = firebase.firestore.batch()
+            const userRef = firebase.firestore.collection('user').doc(userId)
+            var additionalMessage = ''
+            if((
+                (this.user.roleName == 'Administrator' && this.previousRole == 'Administrator') || (this.user.roleName == 'Administrator' || this.user.roleName == 'Moderator')
+                ) && 
+                    (this.previousRole == 'Student' || this.previousRole == '')
+                ){
+                const approvalRef = firebase.firestore.collection('approval').doc()
+                var approvalData = {
+                    requestedById:userId,
+                    requestedBy: this.user.lastName + ", " + this.user.firstName,
+                    requestedRole: this.user.roleName,
+                    requestDate: firebase.fieldValue.serverTimestamp()
+                }
+                batch.set(approvalRef, approvalData)
+                if(this.user.roleName == 'Administrator' && this.previousRole == 'Administrator'){
+                    if(this.previousRole == ''){
+                        this.user.roleName = 'Student'
+                    }
+                    else{
+                        this.user.roleName = this.previousRole
+                    }
+                }
+                else{
+                    this.user.roleName = 'Student'
+                }
+                additionalMessage = ' (Role was set to student for now. Please wait for approval from the administrator)'
+            }
+            
+            batch.set(userRef, this.user)
+
+            batch.commit().then(() => {
+                this.loadingDialog = false
+                this.snackbar = true
+                this.snackbarText = "Profile has been updated" + additionalMessage
+            })
         },
         onPickFile(){
             this.$refs.photoFile.click();
@@ -466,9 +518,14 @@ export default {
                     studentCourse: doc.data().studentCourse,
                     profileImg: doc.data().profileImg,
                     birthDate: doc.data().birthDate,
+                    gender: doc.data().gender,
                     address: doc.data().address,
-                    createdAt: doc.data().createdAt
+                    createdAt: doc.data().createdAt,
+                    openTickets: doc.data().openTickets,
+                    totalTickets: doc.data().totalTickets,
+                    closedTickets: doc.data().closedTickets
                 }
+                this.previousRole = doc.data().roleName
                 this.user = userInfo
             })
     }

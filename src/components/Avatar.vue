@@ -1,5 +1,5 @@
 <template>
-  <v-img max-width="48" width="48" max-height="48" height="48" aspect-ratio="1" :src="src" />
+  <v-img max-width="48" width="48" max-height="48" height="48" class="rounded-circle" aspect-ratio="1" :src="src" />
 </template>
 
 <script>
