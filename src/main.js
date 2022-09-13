@@ -2,11 +2,34 @@ import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
+import vuetify from './plugins/vuetify'
+import LottieAnimation from 'lottie-vuejs'
+import firebase from './firebase/index'
 
+
+Vue.use(LottieAnimation)
 Vue.config.productionTip = false
 
-new Vue({
-  router,
-  store,
-  render: h => h(App)
-}).$mount('#app')
+let app = '';
+
+firebase.auth.onAuthStateChanged( user => {
+  store.dispatch("fetchUser", user)
+  if(user != null){
+    user.getIdToken()
+      .then((token) => { 
+        store.dispatch("initializeToken", token)
+      })
+      .catch((err) => console.log(err))
+  }
+  else{
+    store.dispatch("initializeToken", "")
+  }
+  if(!app){
+    app = new Vue({
+      router,
+      store,
+      vuetify,
+      render: h => h(App)
+    }).$mount('#app')
+  }
+})
