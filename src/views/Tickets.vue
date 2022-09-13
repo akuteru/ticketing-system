@@ -4,7 +4,7 @@
             <v-toolbar elevation="0">
                 <v-toolbar-title>My Tickets</v-toolbar-title>
                 <v-spacer></v-spacer>
-                <v-btn v-if="hasSelectedTicket" 
+                <v-btn v-if="isCloseTicketEnabled" 
                     color="red darken-4" 
                     dark 
                     small
@@ -560,7 +560,7 @@
             const unsubscribe = query.onSnapshot(snapshot => {
                 const tickets = [];
                 snapshot.forEach((doc) => {  
-                    tickets.unshift({
+                    tickets.push({
                         id: doc.id,
                         acceptedById: doc.data().acceptedById,
                         acceptedByName: doc.data().acceptedByName,
@@ -578,6 +578,11 @@
             })
             
             // onUnmounted(unsubscribe)
+        },
+        computed: {
+            isCloseTicketEnabled(){
+                return this.hasSelectedTicket && !this.clickedTicket.isClosed
+            }
         },
         methods: {
             async getUserInfo(){
@@ -648,13 +653,18 @@
                     this.feedback.userId = this.clickedTicket.createdById
                     this.feedback.userFullName = this.clickedTicket.authorName
                     this.feedback.userPhoto = this.clickedTicket.authorImage
-                    this.feedback.repId = userId
-                    this.feedback.repFullName = this.userInfo.firstName + ' ' + this.userInfo.lastName
-                    this.feedback.repPhoto = this.userInfo.profileImg
+                    this.feedback.repId = this.clickedTicket.acceptedById
+                    this.feedback.repFullName = this.clickedTicket.acceptedByName
+                    this.feedback.repPhoto = this.clickedTicket.acceptedByImage
                 }   
             },
             openCloseTicketDialog(){
-                this.closeTicketDialog = true
+                if(this.userInfo.roleName != 'Student'){
+                    this.proceedCloseTicket()
+                }
+                else{
+                    this.closeTicketDialog = true
+                }
             },
             openTicketDialog(){
                 this.createTicketDialog = true
