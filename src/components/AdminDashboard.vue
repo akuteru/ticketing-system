@@ -105,6 +105,10 @@
                                 </v-btn>
                             </template>
                             
+                            <template v-slot:item.createdAt="{item}">
+                                <span class="text-caption">{{getDate(item.createdAt)}}</span>
+                            </template>
+                            
                         </v-data-table>
                     </v-card>
                 </v-tab-item>
@@ -310,7 +314,8 @@ export default {
             {text : '', sortable: false, value:'repPhoto'},
             {text : 'Accomodated by', sortable: false, value:'repFullName'},
             {text : 'Average Rating', sortable: true, value: 'avgRating'},
-            {text : '', sortable: false, value: 'action'}
+            {text : '', sortable: false, value: 'action'},
+            {text : 'Date created', sortable: true, value: 'createdAt'}
         ],
         users: [],
         approvals: [],
@@ -321,7 +326,7 @@ export default {
             return (item1 + item2 + item3 + item4 + item5 + item6) / 6
         },
         getDate(firebaseTimestamp){
-            return moment(firebaseTimestamp.toDate()).format('MMMM Do YYYY')
+            return moment(firebaseTimestamp.toDate()).format('MMMM Do YYYY hh:mm a')
         },
         viewFeedback(feedback){
             this.selectedFeedback = feedback

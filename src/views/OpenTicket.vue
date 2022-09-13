@@ -275,7 +275,6 @@
                     totalTickets: firebase.fieldValue.increment(1)
                 })
                 batch.update(studentUserRef, {
-                    totalTickets: firebase.fieldValue.increment(1),
                     openTickets: firebase.fieldValue.increment(-1)
                 })
 
