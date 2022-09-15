@@ -1,7 +1,7 @@
 <template>
     <div class="login-container">
         <div class="form">
-            <div class="form-toggle"></div>
+            <div class="form-toggle" ref="registerToggle"></div>
             <div class="form-panel one">
                 <div class="form-header">
                     <h1 class="indigo--text text--accent-3">Stakeholder Online System </h1>
@@ -25,7 +25,12 @@
                             <router-link to="ForgotPassword" class="form-recovery">Forgot Password</router-link>
                         </div>
                         <div class="form-group">
-                            <v-btn dark class="indigo accent-3" @click="login">Login</v-btn>
+                            <v-btn dark color="indigo accent-3" @click="login">Login</v-btn>
+                        </div>
+                        <div>
+                            <v-btn text 
+                                style="width: 100%; display: block;"
+                                @click="toogleRegister">Register</v-btn>
                         </div>
                         <div class="form-group">
                             <span class="error-message overline red--text text--accent-3 text-center">{{errorMessage}}</span>
@@ -33,7 +38,7 @@
                     </form>
                 </div>
             </div>
-            <div class="form-panel two indigo accent-3">
+            <div class="form-panel two indigo accent-3" ref="panelTwo">
                 <div class="form-header">
                     <h1>Register Account</h1>
                 </div>
@@ -209,6 +214,9 @@
                 const userId = firebase.auth.currentUser.uid
                 const userCollection = firebase.firestore.collection('user').doc(userId)
                 await userCollection.set(userData)
+            },
+            toogleRegister(){
+                this.$refs.panelTwo.click()
             }
         },
         mounted() {
