@@ -240,6 +240,7 @@ export default {
           'College of Agriculture',
           'College of Arts and Sciences',
           'College of Teacher Education',
+          'Office of Student Affair Services'
         ],
         courseItems:[],
         courseItemsLibrary:[
@@ -404,10 +405,26 @@ export default {
                 name: "Bachelor of Technology and Livelihood Education Major in Home Economics"
             },
             {
-                department: "College of Teacher Education",
-                code: "BTLED IA",
-                name: "Bachelor of Technology and Livelihood Education Major in Industrial Arts"
+                department: "Office of Student Affair Services",
+                code: "SSG",
+                name: "Student Supreme Government"
             },
+            {
+                department: "Office of Student Affair Services",
+                code: "AR",
+                name: "Asscat Registrar"
+            },
+            {
+                department: "Office of Student Affair Services",
+                code: "MIS",
+                name: "MIS"
+            },
+            {
+                department: "Office of Student Affair Services",
+                code: "ADMIN",
+                name: "Admission Office"
+            }
+          
         ]
     }),
     methods: {

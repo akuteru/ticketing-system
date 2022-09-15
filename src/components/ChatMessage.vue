@@ -15,7 +15,33 @@
         </div>
       </div>
       <v-divider></v-divider>
-      <v-card-text :class="sender ? 'text-right' : 'text-left'">
+      <v-card-text v-if="hasAttachments()" :class="sender ? 'text-right' : 'text-left'">
+          <v-item-group>
+            <v-container>
+              <v-row>
+                <v-col 
+                  v-for="(file, i) in attachments"
+                  :key="i">
+                  <v-card
+                    @click="openFile(file.downloadUrl)">
+                    <v-img 
+                      v-if="isImageFile(file.ext)"
+                      :src="file.downloadUrl"
+                      width="150"
+                      height="150">
+
+                    </v-img>
+                    <v-card-text v-else>
+                        <span class="text-button">{{file.fileName}}</span>
+                    </v-card-text>
+                  </v-card>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-item-group>
+          <span>Sent an attachment(s)</span>
+      </v-card-text>
+      <v-card-text v-else :class="sender ? 'text-right' : 'text-left'">
         <slot />
       </v-card-text>
     </v-card>
@@ -30,11 +56,27 @@ export default {
     name: { type: String, default: '' },
     photoUrl: { type: String, default: '' },
     createdAt: {type: Date},
-    sender: { type: Boolean, default: false }
+    sender: { type: Boolean, default: false },
+    attachments: { 
+      type: Array, 
+      default(){
+        return []
+      }}
   },
   computed:{
     getDate(){
       return moment(this.createdAt).fromNow()
+    }
+  },
+  methods:{
+    isImageFile(extension){
+      return extension.match(/\.(jpg|jpeg|png|gif|webp)$/i)
+    },
+    hasAttachments(){
+      return this.attachments != null && this.attachments.length > 0
+    },
+    openFile(url){
+      window.open(url)
     }
   }
 }

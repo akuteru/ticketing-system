@@ -103,6 +103,12 @@
                                     @click="viewFeedback(item)">
                                     View feedback
                                 </v-btn>
+                                <v-btn 
+                                    class="ml-2"
+                                    small
+                                    @click="printFeeback(item)">
+                                    Print feedback
+                                </v-btn>
                             </template>
                             
                             <template v-slot:item.createdAt="{item}">
@@ -242,16 +248,6 @@
                     >
                     </v-textarea>
                 </v-card-text>
-                <v-card-actions>
-                    <v-spacer></v-spacer>
-                    <v-btn
-                        color="blue darken-4"
-                        text
-                        @click="feedbackDialog = false"
-                    >
-                        Close
-                    </v-btn>
-                </v-card-actions>
             </v-card>
         </v-dialog>
         <v-snackbar
@@ -273,6 +269,100 @@
                 </v-btn>
             </template>
         </v-snackbar>
+        <v-card id="feedbackForm" ref="feedbackForm" style="display: none;">
+            <v-card-title>
+                <span class="text-h5">ASCAT Customer Feedback</span>
+            </v-card-title>
+            <v-card-subtitle>
+                <span class="subtitle">Please let us know how we served you. This form may be used for compliment, suggestion and/or complaint</span>
+            </v-card-subtitle>
+            <v-divider></v-divider>
+            <v-card-text class="mt-4">
+                <span>1. How satisfied were you in terms of response time to your transaction given by the office?</span>
+                <v-rating
+                    empty-icon="mdi-star-outline"
+                    full-icon="mdi-star"
+                    half-icon="mdi-star-half-full"
+                    hover
+                    length="5"
+                    size="32"
+                    readonly
+                    color="yellow"
+                    v-model="selectedFeedback.item1"
+                ></v-rating>
+                <span>2. How satisfied were you with the outcome of the service provided?</span>
+                <v-rating
+                    empty-icon="mdi-star-outline"
+                    full-icon="mdi-star"
+                    half-icon="mdi-star-half-full"
+                    hover
+                    length="5"
+                    size="32"
+                    readonly
+                    color="yellow"
+                    v-model="selectedFeedback.item2"
+                ></v-rating>
+                <span>3. How satisfied were you with the service provider's extensive information /understanding of the service being provided?</span>
+                <v-rating
+                    empty-icon="mdi-star-outline"
+                    full-icon="mdi-star"
+                    half-icon="mdi-star-half-full"
+                    hover
+                    length="5"
+                    readonly
+                    size="32"
+                    color="yellow"
+                    v-model="selectedFeedback.item3"
+                ></v-rating>
+                <span>4. How satisfied were you with the service provider's competence or the skill in delivering service?</span>
+                <v-rating
+                    empty-icon="mdi-star-outline"
+                    full-icon="mdi-star"
+                    half-icon="mdi-star-half-full"
+                    hover
+                    length="5"
+                    size="32"
+                    readonly
+                    color="yellow"
+                    v-model="selectedFeedback.item4"
+                ></v-rating>
+                <span>5. How satisfied were you with the service provider's friendliness, courteousness/politeness, fair treatment and willingness to do more then what is expected or going to extra mile?</span>
+                <v-rating
+                    empty-icon="mdi-star-outline"
+                    full-icon="mdi-star"
+                    half-icon="mdi-star-half-full"
+                    hover
+                    length="5"
+                    size="32"
+                    readonly
+                    color="yellow"
+                    v-model="selectedFeedback.item5"
+                ></v-rating>
+                <span>6. How would you rate our <strong>OVERALL SATISFACTION</strong> with regard to the quality of service delivery?</span>
+                <v-rating
+                    empty-icon="mdi-star-outline"
+                    full-icon="mdi-star"
+                    half-icon="mdi-star-half-full"
+                    hover
+                    length="5"
+                    size="32"
+                    readonly
+                    color="yellow"
+                    v-model="selectedFeedback.item6"
+                ></v-rating>
+                <h4>Type of Inquiry</h4>
+                <br/>
+                <p><strong>- {{selectedFeedback.providedDetails}}</strong></p>
+                <br/>
+                <h4>Facts or details about the indcident</h4>
+                <br/>
+                <p><strong>- {{selectedFeedback.incidentDetails}}</strong></p>
+                <br/>
+                <h4>Recommendation/Suggestion/Desired Action from the Office</h4>
+                <br/>
+                <p><strong>- {{selectedFeedback.recommendation}}</strong></p>
+            </v-card-text>
+        </v-card>
     </v-container>
 </template>
 <script>
@@ -331,6 +421,12 @@ export default {
         viewFeedback(feedback){
             this.selectedFeedback = feedback
             this.feedbackDialog = true
+        },
+        async printFeeback(feedback){
+            this.selectedFeedback = feedback
+            setTimeout(() => {
+                this.$htmlToPaper('feedbackForm')
+            }, 2500)
         },
         viewUserInfo(user){
 
