@@ -9,14 +9,20 @@
                 </div>
                 <div class="form-content">
                     <form>
-                        <div class="form-group">
-                            <label for="loginUsername">Email</label>
-                            <input type="text" id="loginUsername" v-model="loginUsername" required>
-                        </div> 
-                        <div class="form-group">
-                            <label for="loginPassword">Password</label>
-                            <input type="password" id="loginPassword" v-model="loginPassword" required>
-                        </div>
+                        <v-text-field
+                            v-model="loginUsername"
+                            label="Email address"
+                            outlined
+                        ></v-text-field>
+                        <v-text-field
+                            v-model="loginPassword"
+                            label="Password"
+                            :append-icon="loginShowPassword ? 'mdi-eye-off' : 'mdi-eye'"
+                            @click:append="loginShowPassword = !loginShowPassword"
+                            @keyup.enter.prevent="login"
+                            :type="loginShowPassword ? 'text' : 'password'"
+                            outlined
+                        ></v-text-field>
                         <div class="form-group">
                             <label class="form-remember">
                                 <input type="checkbox" id="rememberMe" v-model="rememberMe"/> 
@@ -44,21 +50,32 @@
                 </div>
                 <div class="form-content">
                     <form action="">
+                         <v-text-field
+                            v-model="registerUsername"
+                            label="Email address"
+                            solo
+                            outlined
+                        ></v-text-field>
+                        <v-text-field
+                            v-model="registerPassword"
+                            label="Password"
+                            solo
+                            :append-icon="registerShowPassword ? 'mdi-eye-off' : 'mdi-eye'"
+                            @click:append="registerShowPassword = !registerShowPassword"
+                            :type="registerShowPassword ? 'text' : 'password'"
+                            outlined
+                        ></v-text-field>
+                        <v-text-field
+                            v-model="confirmPassword"
+                            label="Password"
+                            solo
+                            :append-icon="registerRetypeShowPassword ? 'mdi-eye-off' : 'mdi-eye'"
+                            @click:append="registerRetypeShowPassword = !registerRetypeShowPassword"
+                            :type="registerRetypeShowPassword ? 'text' : 'password'"
+                            outlined
+                        ></v-text-field>
                         <div class="form-group">
-                            <label for="registerUsername">Email</label>
-                            <input type="text" id="registerUsername" v-model="registerUsername" required>
-
-                        </div>
-                        <div class="form-group">
-                            <label for="registerPassword">Password</label>
-                            <input type="password" v-model="registerPassword" id="registerPassword">
-                        </div>
-                        <div class="form-group">
-                            <label for="confirmPassword">Confirm Password</label>
-                            <input type="password" v-model="confirmPassword" id="confirmPassword">
-                        </div>
-                        <div class="form-group">
-                            <v-btn dark class="grey lighten-4 indigo--text text--accent-3" @click="register">Create account</v-btn>
+                            <v-btn dark class="grey lighten-4 indigo--text text--accent-3" height="50" @click="register">Create account</v-btn>
                         </div>
                     </form>
                 </div>
@@ -68,9 +85,13 @@
 </template>
 <script>
     import firebase from '../firebase/index'
+    let auth = firebase.auth
     export default {
         data: () => ({
             loginUsername: "",
+            loginShowPassword: false,
+            registerShowPassword: false,
+            registerRetypeShowPassword: false,
             loginPassword: "",
             registerUsername: "",
             registerPassword: "",
@@ -87,13 +108,14 @@
                     return
                 }
                 if(this.rememberMe){
-                    this.loginToFirebase()
+                    auth.setPersistence(firebase.persistence.LOCAL).then(() => {
+                        this.loginToFirebase()
+                    })
                 }
                 else{
-                    firebase.auth
-                        .setPersistence(persistence.SESSION).then(() => {
-                            this.loginToFirebase()
-                        })
+                    auth.setPersistence(firebase.persistence.SESSION).then(() => {
+                        this.loginToFirebase()
+                    })
                 }
             },
             async loginToFirebase(){

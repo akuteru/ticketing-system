@@ -121,12 +121,14 @@
                                             v-model="user.roleName"
                                             :items="roleItems"
                                             persistent-hint
+                                            @change = "onRoleChange"
                                             hint="Administrator and Moderator roles requires approval before having admin access"
                                         ></v-combobox>
                                         <v-combobox
                                             filled
+                                            class="mt-3"
                                             outlined
-                                            label="Department"
+                                            label="Colleges"
                                             v-model="user.department"
                                             :items="departmentItems"
                                             @change="onDepartmentChange"
@@ -140,7 +142,7 @@
                                             item-text="name"
                                             item-value="code"
                                             persistent-hint
-                                            hint="Course lists depends on selected department"
+                                            hint="Course lists depends on the selected college"
                                         ></v-combobox>
                                     </v-col>
                                 </v-row>
@@ -212,6 +214,8 @@ export default {
         errorDialog: false,
         loadingDialog: false,
         previousRole: '',
+        previousDepartment: '',
+        previousCourse: '',
         genderList: ["Male","Female"],
         user:{
             lastName: '',
@@ -239,8 +243,7 @@ export default {
           'College of Engineering and Information Sciences',
           'College of Agriculture',
           'College of Arts and Sciences',
-          'College of Teacher Education',
-          'Office of Student Affair Services'
+          'College of Teacher Education'
         ],
         courseItems:[],
         courseItemsLibrary:[
@@ -405,22 +408,27 @@ export default {
                 name: "Bachelor of Technology and Livelihood Education Major in Home Economics"
             },
             {
-                department: "Office of Student Affair Services",
+                department: "Offices",
+                code: "OSA",
+                name: "Office of Student Affair Services"
+            },
+            {
+                department: "Offices",
                 code: "SSG",
                 name: "Student Supreme Government"
             },
             {
-                department: "Office of Student Affair Services",
+                department: "Offices",
                 code: "AR",
                 name: "Asscat Registrar"
             },
             {
-                department: "Office of Student Affair Services",
+                department: "Offices",
                 code: "MIS",
                 name: "MIS"
             },
             {
-                department: "Office of Student Affair Services",
+                department: "Offices",
                 code: "ADMIN",
                 name: "Admission Office"
             }
@@ -428,6 +436,14 @@ export default {
         ]
     }),
     methods: {
+        onRoleChange(){
+            if(this.user.roleName == 'Student'){
+                this.departmentItems = this.departmentItems.filter(d => d !== 'Offices')
+            }
+            else{
+                this.departmentItems.push("Offices")
+            }
+        },
         onDepartmentChange(){
             this.courseItems = this.courseItemsLibrary.filter(dept => dept.department == this.user.department)
         },
@@ -478,6 +494,8 @@ export default {
                     requestedById:userId,
                     requestedBy: this.user.lastName + ", " + this.user.firstName,
                     requestedRole: this.user.roleName,
+                    requestedDepartment: this.user.department,
+                    requestedCourse: this.user.studentCourse,
                     requestDate: firebase.fieldValue.serverTimestamp()
                 }
                 batch.set(approvalRef, approvalData)
@@ -487,10 +505,14 @@ export default {
                     }
                     else{
                         this.user.roleName = this.previousRole
+                        this.user.department = this.previousDepartment
+                        this.user.studentCourse = this.previousCourse
                     }
                 }
                 else{
                     this.user.roleName = 'Student'
+                    this.user.department = this.previousDepartment
+                    this.user.studentCourse = this.previousCourse
                 }
                 additionalMessage = ' (Role was set to student for now. Please wait for approval from the administrator)'
             }
@@ -543,6 +565,8 @@ export default {
                     closedTickets: doc.data().closedTickets
                 }
                 this.previousRole = doc.data().roleName
+                this.previousDepartment = doc.data().department
+                this.previousCourse = doc.data().studentCourse
                 this.user = userInfo
             })
     }

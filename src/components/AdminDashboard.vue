@@ -69,6 +69,9 @@
                                     Reject
                                 </v-btn>
                             </template>
+                            <template v-slot:item.requestedCourse="{item}">
+                                <span class="text-caption">{{item.requestedCourse.code}}</span>
+                            </template>
                             <template v-slot:item.requestDate="{item}">
                                 <span class="text-caption">{{getDate(item.requestDate)}}</span>
                             </template>
@@ -384,6 +387,8 @@ export default {
         approvalHeaders: [
             {text : 'Requested by', sortable: false, value:'requestedBy'},
             {text : 'Requested Role', sortable: false, value:'requestedRole'},
+            {text : 'Requested Department', sortable: false, value:'requestedDepartment'},
+            {text : 'Requested Course', sortable: false, value:'requestedCourse'},
             {text : 'Date', sortable: true, value:'requestDate'},
             {text : '', sortable: false, value:'actions'},
         ],
@@ -436,7 +441,11 @@ export default {
             var batch = firestore.batch()
             const userRef = firestore.collection('user').doc(item.requestedById)
             const approvalRef = firestore.collection('approval').doc(item.id)
-            batch.update(userRef, {roleName: item.requestedRole})
+            batch.update(userRef, {
+                roleName: item.requestedRole,
+                department: item.requestedDepartment,
+                studentCourse: item.requestedCourse 
+            })
             batch.delete(approvalRef)
             batch.commit().then(() => {
                 this.loadingDialog = false
@@ -492,6 +501,8 @@ export default {
                     requestedBy: doc.data().requestedBy,
                     requestedById: doc.data().requestedById,
                     requestedRole: doc.data().requestedRole,
+                    requestedDepartment: doc.data().requestedDepartment,
+                    requestedCourse: doc.data().requestedCourse,
                     actions: ''
                 })
             })

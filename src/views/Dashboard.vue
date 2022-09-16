@@ -176,7 +176,7 @@
                 'College of Agriculture',
                 'College of Arts and Sciences',
                 'College of Teacher Education',
-                'Office of Student Affair Services'
+                'Offices'
             ],
         }),
         mounted() {
