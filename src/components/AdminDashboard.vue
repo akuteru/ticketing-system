@@ -276,10 +276,29 @@
             <v-card-title>
                 <span class="text-h5">ASCAT Customer Feedback</span>
             </v-card-title>
-            <v-card-subtitle>
-                <span class="subtitle">Please let us know how we served you. This form may be used for compliment, suggestion and/or complaint</span>
-            </v-card-subtitle>
             <v-divider></v-divider>
+            <div style="display:flex; margin-top: 10px; margin-left: 15px; align-items: center">
+                <img v-bind:src="selectedFeedback.userPhoto" style="width: 64px; height: auto;"/>
+                <div style="display: flex; flex-direction: column; margin-left: 15px;">
+                    <span>Submitted by:</span>
+                    <h4>{{selectedFeedback.userFullName}}</h4>
+                </div>
+            </div>
+            <div style="display:flex; margin-top: 10px; margin-left: 15px; align-items: center">
+                <img v-bind:src="selectedFeedback.repPhoto" style="width: 64px; height: auto;"/>
+                <div style="display: flex; flex-direction: column; margin-left: 15px;">
+                    <span>Accommodated by:</span>
+                    <h4>{{selectedFeedback.repFullName}}</h4>
+                </div>
+            </div>
+            <div style="display:flex; margin-top: 10px; flex-direction: column; margin-left: 15px;">
+                <span>Department:</span>
+                <h4>{{selectedFeedback.department}}</h4>
+            </div>
+            <div style="display:flex; margin-top: 10px; flex-direction: column; margin-left: 15px; margin-bottom: 20px;">
+                <span>Date of Submission:</span>
+                <h4>{{getDate(selectedFeedback.createdAt)}}</h4>
+            </div>
             <v-card-text class="mt-4">
                 <span>1. How satisfied were you in terms of response time to your transaction given by the office?</span>
                 <v-rating
@@ -364,6 +383,8 @@
                 <h4>Recommendation/Suggestion/Desired Action from the Office</h4>
                 <br/>
                 <p><strong>- {{selectedFeedback.recommendation}}</strong></p>
+                <br>
+                <br>
             </v-card-text>
         </v-card>
     </v-container>
@@ -421,16 +442,29 @@ export default {
             return (item1 + item2 + item3 + item4 + item5 + item6) / 6
         },
         getDate(firebaseTimestamp){
+            if(firebaseTimestamp == null){ return ''}
+            
             return moment(firebaseTimestamp.toDate()).format('MMMM Do YYYY hh:mm a')
         },
         viewFeedback(feedback){
             this.selectedFeedback = feedback
             this.feedbackDialog = true
         },
-        async printFeeback(feedback){
+        printFeeback(feedback){
+            this.loadingDialog = true
+            this.loadingText = "Generating print form..."
             this.selectedFeedback = feedback
-            setTimeout(() => {
+            const modCollection = firestore.collection('user').doc(this.selectedFeedback.repId)
+            modCollection.get().then((doc) => {
+                this.selectedFeedback.department = doc.data().department
+                this.loadingDialog = false
                 this.$htmlToPaper('feedbackForm')
+            })
+            .catch((err) => {
+                this.loadingDialog = false
+            })
+            setTimeout(() => {
+                
             }, 2500)
         },
         viewUserInfo(user){
@@ -531,6 +565,7 @@ export default {
                     recommendation: doc.data().recommendation,
                     createdAt: doc.data().createdAt,
                     action: '',
+                    department: '',
                     avgRating: this.getAverageScore(doc.data().item1,doc.data().item2,doc.data().item3,doc.data().item4,doc.data().item5,doc.data().item6)
                 })
             })
